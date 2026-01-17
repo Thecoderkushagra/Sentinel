@@ -1,7 +1,12 @@
 package com.TheCoderKushagra.Sentinel.service;
 
+import com.TheCoderKushagra.Sentinel.entity.AiResponse;
 import com.TheCoderKushagra.Sentinel.entity.DemoRequestContext;
 import com.TheCoderKushagra.Sentinel.entity.ThreatEvaluationResult;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -9,6 +14,12 @@ import java.util.List;
 
 @Service
 public class ThreatEvaluationService {
+    @Autowired
+    private ChatClient Gemini;
+
+    @Value("classpath:/prompts/systemPrompt.st")
+    private Resource systemPrompt;
+
     public ThreatEvaluationResult evaluate(DemoRequestContext ctx) {
 
         int score = 0;
@@ -68,5 +79,13 @@ public class ThreatEvaluationService {
                 .decision(decision)
                 .reasons(reasons)
                 .build();
+    }
+
+    public AiResponse callAiService(String userPrompt) {
+        return Gemini.prompt()
+                .user(userPrompt)
+                .system(systemPrompt)
+                .call()
+                .entity(AiResponse.class);
     }
 }
